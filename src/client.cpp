@@ -5,7 +5,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#include "util.h"
+#include "include/util.h"
 
 #define R_PORT 8888
 #define R_ADDR "127.0.0.1"
