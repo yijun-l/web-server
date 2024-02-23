@@ -10,6 +10,7 @@ set(SERVER_CODE
         ${SRC}/NetAddr.cpp
         ${SRC}/Socket.cpp
         ${SRC}/util.cpp
+        ${SRC}/Channel.cpp
 )
 
 set(CLIENT_CODE

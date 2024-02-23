@@ -1,4 +1,5 @@
 #pragma once
+#include <unistd.h>
 #include <iostream>
 #include "NetAddr.h"
 #include "util.h"
@@ -12,12 +13,12 @@ public:
     Socket();
     Socket(const std::string& ip, uint16_t port);
     ~Socket();
-    int getFd();
-    void setFd(int fd);
+    [[nodiscard]] int getFd() const;
+    void setFd(int p_fd);
     NetAddr* getAddr();
     void listenOn();
-    int acceptClient(NetAddr* client_addr);
+    int acceptClient(NetAddr* client_addr) const;
     void printClientConnect();
-    void setUnblock();
+    void setUnblock() const;
 };
 

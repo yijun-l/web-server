@@ -1,20 +1,21 @@
 #include "include/Socket.h"
 
 Socket::Socket() : addr(new NetAddr()), fd(-1) {
-    memset(addr, 0, sizeof(addr));
 }
 
 Socket::Socket(const std::string& ip, uint16_t port) : addr(new NetAddr(ip, port)), fd(-1) {}
 
 Socket::~Socket() {
+    close(fd);
     delete addr;
+    std::cout << "socket connection fd(" << fd << ") dropped" << std::endl;
 }
 
-void Socket::setFd(int fd) {
-    this->fd = fd;
+void Socket::setFd(int p_fd) {
+    fd = p_fd;
 }
 
-int Socket::getFd(){
+int Socket::getFd() const{
     return fd;
 }
 
@@ -40,17 +41,16 @@ void Socket::listenOn() {
     setNonBlocking(fd);    /* add non-blocking to listen fd */
 }
 
-int Socket::acceptClient(NetAddr* client_addr){
+int Socket::acceptClient(NetAddr* client_addr) const{
     /* accept() - accepts an incoming connection and creates a new socket for communication. */
     int client_fd = accept(fd, (struct sockaddr*)&client_addr->addr, &client_addr->addr_len);
     return client_fd;
 }
 
 void Socket::printClientConnect(){
-    std::cout << "client fd" << fd << "connected from " << inet_ntoa(addr->addr.sin_addr) << ":" << ntohs(addr->addr.sin_port) << std::endl;
-//    printf("client fd %d connected from %s:%d\n", acpt_fd, inet_ntoa(remote_addr.sin_addr), ntohs(remote_addr.sin_port));
+    std::cout << "client fd" << fd << " connected from " << inet_ntoa(addr->addr.sin_addr) << ":" << ntohs(addr->addr.sin_port) << std::endl;
 }
 
-void Socket::setUnblock(){
+void Socket::setUnblock() const{
     setNonBlocking(fd);
 }

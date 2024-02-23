@@ -1,52 +1,57 @@
 #include "include/Socket.h"
 #include "include/NetAddr.h"
 #include "include/Epoll.h"
+#include "include/Channel.h"
 
 #define IP_ADDR "0.0.0.0"
 #define PORT 8888
 #define BUF_SIZE 128
 
-int main(int argc, char* argv[]){
+int main() {
     int sock_fd, ret;
     char buf[BUF_SIZE];
-    Socket* fd_set[1024] = {nullptr};
 
-    Socket* lisn_fd = new Socket(IP_ADDR, PORT);
-    lisn_fd->listenOn();
+    /* create a socket for service listening*/
+    auto *listen_socket = new Socket(IP_ADDR, PORT);
+    listen_socket->listenOn();
 
-    Epoll* ep = new Epoll();
-    ep->addFd(lisn_fd->getFd(), EPOLLIN | EPOLLET);
+    /* create an epoll instance, and add listen fd */
+    auto *ep = new Epoll();
+    auto *listen_channel = new Channel(listen_socket, Service::UPPER);
+    ep->updateChannel(listen_channel);
 
-    while(1){
-        std::vector<epoll_event> events = ep->poll();
+    /* create a loop and wait epoll events */
+    while (true) {
+        std::vector<epoll_event> events = ep->poll(EPOLL_TIMER);
         int fds = events.size();
-        for(int i = 0; i < fds; i++) {
-            if (events[i].data.fd == lisn_fd->getFd()) {
-                Socket *client_sock = new Socket();
-                ret = lisn_fd->acceptClient(client_sock->getAddr());
-                client_sock->setFd(ret);
-                fd_set[ret] = client_sock;
-                client_sock->printClientConnect();
-                client_sock->setUnblock();
-                ep->addFd(client_sock->getFd(), EPOLLIN | EPOLLET);
-            } else if (events[i].events & EPOLLIN) {
-                sock_fd = events[i].data.fd;
+        for (int i = 0; i < fds; i++) {
+            auto ready_channel = (Channel *) events[i].data.ptr;
+
+            /* when a new client connected */
+            if (ready_channel->getFd() == listen_socket->getFd()) {
+                auto *client_socket = new Socket();
+                ret = listen_socket->acceptClient(client_socket->getAddr());
+                client_socket->setFd(ret);
+                client_socket->printClientConnect();
+                client_socket->setUnblock();
+
+                auto *client_channel = new Channel(client_socket, Service::UPPER);
+                ep->updateChannel(client_channel);
+            }
+                /* when received the message from the client */
+            else if (events[i].events & EPOLLIN) {
+                sock_fd = ready_channel->getFd();
                 /* recv() - receive data over a socket. */
                 ret = recv(sock_fd, buf, BUF_SIZE, 0);
                 serr(ret, "recv()");
-                if (ret == 0){
-                    ep->delFd(sock_fd);
-                    std::cout << "client fd " << sock_fd << " dropped" << std::endl;
-                    close(sock_fd);
-                    delete fd_set[sock_fd];
-                    fd_set[sock_fd] = nullptr;
+                if (ret == 0) {
+                    ep->removeChannel(ready_channel);
                     continue;
                 }
-                std::cout << "    message from client fd " << sock_fd << ": " << buf <<std::endl;
+                std::cout << "    message from client fd " << sock_fd << ": " << buf << std::endl;
 
-                for (int i = 0; i < ret; i++)
-                {
-                    *(buf + i) = toupper(*(buf + i));
+                for (int j = 0; j < ret; j++) {
+                    *(buf + j) = toupper(*(buf + j));
                 }
 
                 /* send() - send data over a socket. */
@@ -56,7 +61,4 @@ int main(int argc, char* argv[]){
         }
     }
 
-    delete lisn_fd;
-
-    return 0;
 }

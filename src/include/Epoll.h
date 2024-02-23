@@ -1,9 +1,10 @@
 #pragma once
 #include <sys/epoll.h>
 #include <unistd.h>
-#include <string.h>
+#include <cstring>
 #include <vector>
 #include "util.h"
+#include "Channel.h"
 
 #define MAX_EVENTS 128
 
@@ -16,7 +17,7 @@ public:
     Epoll();
     ~Epoll();
 
-    void addFd(int fd, uint32_t event);
-    void delFd(int fd);
+    void updateChannel(Channel* channel) const;
+    void removeChannel(Channel* channel) const;
     std::vector<struct epoll_event> poll (int timeout = -1);
 };

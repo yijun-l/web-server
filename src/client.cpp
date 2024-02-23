@@ -1,6 +1,6 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
 #include <unistd.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -13,7 +13,7 @@
 int main() {
     int sockfd;
     int rc;
-    struct sockaddr_in remote_addr;
+    struct sockaddr_in remote_addr = {};
     char *trans_buffer = (char*)malloc(BUF_SIZE);
 
     remote_addr.sin_family = AF_INET;
@@ -29,7 +29,7 @@ int main() {
 
     printf("connected to %s:%d\n", inet_ntoa(remote_addr.sin_addr), ntohs(remote_addr.sin_port));
 
-    while(1){
+    while(true){
         bzero(trans_buffer, BUF_SIZE);
 
         printf("==> ");

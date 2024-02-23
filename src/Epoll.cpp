@@ -1,41 +1,51 @@
 #include "include/Epoll.h"
 
-Epoll::Epoll() : epfd(-1), events(nullptr){
+Epoll::Epoll() : epfd(-1), events(nullptr) {
     epfd = epoll_create(1);
     serr(epfd, "epoll_create()");
-    events = new struct epoll_event[MAX_EVENTS];
-    memset(events, 0, sizeof(events));
+    events = new struct epoll_event[MAX_EVENTS]{};
 }
 
-Epoll::~Epoll(){
-    if(epfd != -1){
+Epoll::~Epoll() {
+    if (epfd != -1) {
         close(epfd);
         epfd = -1;
     }
-    delete [] events;
+    delete[] events;
 }
 
-void Epoll::addFd(int fd, uint32_t event) {
-    struct epoll_event ev;
-    ev.events = event;
-    ev.data.fd = fd;
-
-    int ret = epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &ev);
-    serr(ret, "epoll_ctl() add listen fd");
-}
-
-void Epoll::delFd(int fd){
-    int ret = epoll_ctl(epfd, EPOLL_CTL_DEL, fd, NULL);
-    serr(ret, "epoll_ctl() delete client fd");
-}
-
-std::vector<epoll_event> Epoll::poll(int timeout){
-    std::vector<epoll_event> activeEvents;
+std::vector<struct epoll_event> Epoll::poll(int timeout) {
+    std::vector<struct epoll_event> activeEvents;
     int fds = epoll_wait(epfd, events, MAX_EVENTS, timeout);
     serr(fds, "epoll_wait()");
-    for(int i = 0; i < fds; i++){
+    activeEvents.reserve(fds);
+for (int i = 0; i < fds; i++) {
         activeEvents.push_back(events[i]);
     }
     return activeEvents;
+}
+
+void Epoll::updateChannel(Channel *channel) const {
+    int ret;
+    struct epoll_event ev{};
+    ev.events = channel->getEvents();
+    ev.data.ptr = channel;
+
+    if (channel->getInEpoll()) {
+        ret = epoll_ctl(epfd, EPOLL_CTL_MOD, channel->getFd(), &ev);
+        serr(ret, "epoll_ctl() modify fd");
+    } else {
+        ret = epoll_ctl(epfd, EPOLL_CTL_ADD, channel->getFd(), &ev);
+        serr(ret, "epoll_ctl() add fd");
+        channel->setInEpoll(true);
+    }
+}
+
+void Epoll::removeChannel(Channel *channel) const {
+    if (channel->getInEpoll()) {
+        int ret = epoll_ctl(epfd, EPOLL_CTL_DEL, channel->getFd(), nullptr);
+        serr(ret, "epoll_ctl() delete client fd");
+        delete channel;
+    }
 }
 
