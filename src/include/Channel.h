@@ -3,6 +3,7 @@
 #include "Socket.h"
 
 enum class Service{
+    LISTEN,
     UPPER
 };
 
@@ -24,6 +25,7 @@ public:
     [[nodiscard]] int getFd() const;
     [[nodiscard]] bool getInEpoll() const;
     Service getServiceType();
+    Socket* getSocket();
 
 
 };

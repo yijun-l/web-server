@@ -32,3 +32,7 @@ bool Channel::getInEpoll() const {
 uint32_t Channel::getEvents() const {
     return events;
 }
+
+Socket *Channel::getSocket() {
+    return socket;
+}
