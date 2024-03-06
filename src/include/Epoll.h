@@ -19,5 +19,5 @@ public:
 
     void updateChannel(Channel* channel) const;
     void removeChannel(Channel* channel) const;
-    std::vector<struct epoll_event> poll (int timeout = -1);
+    std::vector<Channel*> poll (int timeout = -1);
 };

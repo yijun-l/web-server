@@ -14,13 +14,13 @@ Epoll::~Epoll() {
     delete[] events;
 }
 
-std::vector<struct epoll_event> Epoll::poll(int timeout) {
-    std::vector<struct epoll_event> activeEvents;
+std::vector<Channel*> Epoll::poll(int timeout) {
+    std::vector<Channel*> activeEvents;
     int fds = epoll_wait(epfd, events, MAX_EVENTS, timeout);
     serr(fds, "epoll_wait()");
     activeEvents.reserve(fds);
-for (int i = 0; i < fds; i++) {
-        activeEvents.push_back(events[i]);
+    for (int i = 0; i < fds; i++) {
+        activeEvents.push_back((Channel*)events[i].data.ptr);
     }
     return activeEvents;
 }

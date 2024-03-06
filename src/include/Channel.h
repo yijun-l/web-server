@@ -1,5 +1,6 @@
 #pragma once
 #include <sys/epoll.h>
+#include <functional>
 #include "Socket.h"
 
 enum class Service{
@@ -26,7 +27,5 @@ public:
     [[nodiscard]] bool getInEpoll() const;
     Service getServiceType();
     Socket* getSocket();
-
-
 };
 

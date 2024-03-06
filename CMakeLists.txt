@@ -12,8 +12,11 @@ set(SERVER_CODE
         ${SRC}/util.cpp
         ${SRC}/Channel.cpp
         ${SRC}/Server.cpp
+        ${SRC}/Handler.cpp
         ${SRC}/EventLoop.cpp
         ${SRC}/include/EventLoop.h
+        ${SRC}/Acceptor.cpp
+
 )
 
 set(CLIENT_CODE

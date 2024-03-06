@@ -1,17 +1,17 @@
 #pragma once
 #include "Epoll.h"
+#include "Handler.h"
 
 class EventLoop {
 private:
-    Epoll* _epoll;
+    Epoll* epoll;
+    Handler* handler;
     bool run;
-    char buf[1024];
 
 public:
-    EventLoop();
+    explicit EventLoop(Handler* _handler);
     ~EventLoop();
     void loop();
     void addChannel(Channel*);
-    void listenHandler(Channel*);
-    void upperHandler(Channel*);
+    void delChannel(Channel*);
 };
