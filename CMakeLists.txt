@@ -16,6 +16,8 @@ set(SERVER_CODE
         ${SRC}/EventLoop.cpp
         ${SRC}/include/EventLoop.h
         ${SRC}/Acceptor.cpp
+        ${SRC}/TaskQueue.cpp
+        ${SRC}/ThreadPool.cpp
 
 )
 

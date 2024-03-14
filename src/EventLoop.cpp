@@ -23,6 +23,11 @@ void EventLoop::loop() {
         std::vector<Channel*> channels = epoll->poll(EPOLL_TIMER);
         for(auto & channel : channels){
             handler->HandlerEntry(channel);
+            pthread_cond_signal(handler->getPool()->getNotEmptyCond());
         }
+//        if(!handler->getPool()->isEmpty()){
+//            pthread_cond_broadcast(handler->getPool()->getNotEmptyCond());
+//        }
+
     }
 }

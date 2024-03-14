@@ -7,6 +7,7 @@
 #define EPOLL_TIMER 1000
 
 extern void serr(int, const char*);
+extern void terr(int, const char *);
 extern void setNonBlocking (int);
 
 #endif

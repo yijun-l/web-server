@@ -44,6 +44,8 @@ void Socket::listenOn() {
 int Socket::acceptClient(NetAddr* client_addr) const{
     /* accept() - accepts an incoming connection and creates a new socket for communication. */
     int client_fd = accept(fd, (struct sockaddr*)&client_addr->addr, &client_addr->addr_len);
+    serr(client_fd, "accept()");
+
     return client_fd;
 }
 
